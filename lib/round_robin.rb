@@ -1,11 +1,8 @@
-require 'pry'
-
 def schedule_tournament(names)
   matchups = generate_matchups(names)
-  number_of_participants = names.count
-  tournament = create_rounds(number_of_participants, names)
-  matches_per_round = number_of_participants / 2
-  matches_per_round += 1 if odd?(number_of_participants)
+  tournament = create_rounds(names)
+  matches_per_round = names.count / 2
+  matches_per_round += 1 if odd?(names)
 
   tournament.each do |round|
     add_bye(round, names)
@@ -23,8 +20,8 @@ def schedule_tournament(names)
   tournament
 end
 
-def odd?(number_of_participants)
-  (number_of_participants % 2 != 0)
+def odd?(names)
+  (names.count % 2 != 0)
 end
 
 def add_bye(round, names)
@@ -39,12 +36,10 @@ def used_matchup?(round, matches_by_name)
   end
 end
 
-def create_rounds(number_of_participants, names)
-  schedule = []
-  number_of_rounds = (number_of_participants - 1)
-  number_of_rounds += 1 if odd?(number_of_participants)
-  (number_of_rounds).times { schedule << [] }
-  schedule
+def create_rounds(names)
+  number_of_rounds = (names.count - 1)
+  number_of_rounds += 1 if odd?(names)
+  schedule = Array.new(number_of_rounds) { [] }
 end
 
 def generate_matchups(names)
