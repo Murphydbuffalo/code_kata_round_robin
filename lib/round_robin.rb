@@ -4,11 +4,15 @@ def schedule_tournament(names)
   matchups = generate_matchups(names)
   tournament = create_rounds(names)
   tournament.each do |round|
-    matchups.each do |matches_by_name|
-      unless used_matchup?(round, matches_by_name)
-        round.push(matches_by_name.shift)
+    while round.count < 3
+      matchups.each do |matches_by_name|
+        if used_matchup?(round, matches_by_name)
+          matches_by_name.push(matches_by_name.shift)
+        else
+          round.push(matches_by_name.shift)
+        end
+        break if round.count == 3
       end
-      break if round.count == 3
     end
   end
   tournament
