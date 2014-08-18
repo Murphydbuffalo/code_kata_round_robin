@@ -3,21 +3,22 @@ require 'pry'
 def schedule_tournament(names)
   matchups = generate_matchups(names)
   number_of_participants = names.count
-  tournament = create_rounds(number_of_participants)
+  tournament = create_rounds(number_of_participants, names)
   matches_per_round = number_of_participants / 2
+  matches_per_round += 1 if odd?(number_of_participants)
 
   tournament.each do |round|
+    add_bye(round, names)
     while round.count < matches_per_round
       matchups.each do |matches_by_name|
         if used_matchup?(round, matches_by_name)
           matches_by_name.push(matches_by_name.shift)
         else
-          round.push(matches_by_name.shift)
+          round.push(matches_by_name.shift) unless matches_by_name.first == nil
         end
         break if round.count == matches_per_round
       end
     end
-    add_bye(round, tournament, names) if odd?(number_of_participants)
   end
   tournament
 end
@@ -26,21 +27,19 @@ def odd?(number_of_participants)
   (number_of_participants % 2 != 0)
 end
 
-def add_bye(round, tournament, names)
-  round.push([names.pop]) unless used_name?(tournament, names.last) 
-end
-
-def used_name?(tournament, bye_name)
-  tournament.flatten.any? { |existing_name| existing_name == [bye_name] }
+def add_bye(round, names)
+  round.push([names.pop])
 end
 
 def used_matchup?(round, matches_by_name)
-  round.flatten.any? do |name|
-    name == matches_by_name.first[0] || name == matches_by_name.first[1]
+  if matches_by_name.first != nil
+    round.flatten.any? do |name|
+      name == matches_by_name.first[0] || name == matches_by_name.first[1]
+    end
   end
 end
 
-def create_rounds(number_of_participants)
+def create_rounds(number_of_participants, names)
   schedule = []
   number_of_rounds = (number_of_participants - 1)
   number_of_rounds += 1 if odd?(number_of_participants)
@@ -66,6 +65,4 @@ def generate_matchups(names)
   matchups
 end
 
-# p generate_matchups(['Dan', 'Tom', 'Frank', 'Fred', 'Marcus', 'Zak'])
-# p create_rounds(['Dan', 'Tom', 'Frank', 'Fred', 'Marcus', 'Zak'])
 p schedule_tournament(['Dan', 'Tom', 'Frank', 'Fred', 'Marcus', 'Zak', 'Gavin'])
