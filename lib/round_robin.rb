@@ -3,6 +3,9 @@ require 'pry'
 def schedule_tournament(names)
   matchups = generate_matchups(names)
   tournament = create_rounds(names)
+  matches_per_round = names.count / 2
+  matches_per_round += 1 if names.count % 2 != 0
+
   tournament.each do |round|
     while round.count < 3
       matchups.each do |matches_by_name|
@@ -26,7 +29,9 @@ end
 
 def create_rounds(names)
   schedule = []
-  (names.count - 1).times { schedule << [] }
+  number_of_rounds = (names.count - 1)
+  number_of_rounds += 1 if names.count % 2 != 0
+  (number_of_rounds).times { schedule << [] }
   schedule
 end
 
