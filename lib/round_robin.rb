@@ -2,23 +2,36 @@ require 'pry'
 
 def schedule_tournament(names)
   matchups = generate_matchups(names)
-  tournament = create_rounds(names)
-  matches_per_round = names.count / 2
-  matches_per_round += 1 if names.count % 2 != 0
+  number_of_participants = names.count
+  tournament = create_rounds(number_of_participants)
+  matches_per_round = number_of_participants / 2
 
   tournament.each do |round|
-    while round.count < 3
+    while round.count < matches_per_round
       matchups.each do |matches_by_name|
         if used_matchup?(round, matches_by_name)
           matches_by_name.push(matches_by_name.shift)
         else
           round.push(matches_by_name.shift)
         end
-        break if round.count == 3
+        break if round.count == matches_per_round
       end
     end
+    add_bye(round, tournament, names) if odd?(number_of_participants)
   end
   tournament
+end
+
+def odd?(number_of_participants)
+  (number_of_participants % 2 != 0)
+end
+
+def add_bye(round, tournament, names)
+  round.push([names.pop]) unless used_name?(tournament, names.last) 
+end
+
+def used_name?(tournament, bye_name)
+  tournament.flatten.any? { |existing_name| existing_name == [bye_name] }
 end
 
 def used_matchup?(round, matches_by_name)
@@ -27,10 +40,10 @@ def used_matchup?(round, matches_by_name)
   end
 end
 
-def create_rounds(names)
+def create_rounds(number_of_participants)
   schedule = []
-  number_of_rounds = (names.count - 1)
-  number_of_rounds += 1 if names.count % 2 != 0
+  number_of_rounds = (number_of_participants - 1)
+  number_of_rounds += 1 if odd?(number_of_participants)
   (number_of_rounds).times { schedule << [] }
   schedule
 end
@@ -55,4 +68,4 @@ end
 
 # p generate_matchups(['Dan', 'Tom', 'Frank', 'Fred', 'Marcus', 'Zak'])
 # p create_rounds(['Dan', 'Tom', 'Frank', 'Fred', 'Marcus', 'Zak'])
-p schedule_tournament(['Dan', 'Tom', 'Frank', 'Fred', 'Marcus', 'Zak'])
+p schedule_tournament(['Dan', 'Tom', 'Frank', 'Fred', 'Marcus', 'Zak', 'Gavin'])
