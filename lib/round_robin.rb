@@ -2,53 +2,48 @@ require 'pry'
 
 def schedule_tournament(names)
   matchups = generate_matchups(names)
-  matches_per_round = names.count / 2
-  schedule = []
-  (names.count - 1).times do
-    schedule << create_round(schedule, matchups, matches_per_round)
-  end
-  schedule
-end
-
-def create_round(schedule, matchups, matches_per_round)
-  round = []
-  matchups.each do |matchup|
-    round << matchup unless used_matchup?(schedule, matchup) || used_name?(round, matchup)
-    # binding.pry
-    return round if round.count == matches_per_round
-  end
-end
-
-def used_matchup?(schedule, matchup)
-  schedule.any? do |round| 
-    round.any? do |previous_matchup|
-      previous_matchup == matchup || previous_matchup == matchup.reverse
+  tournament = create_rounds(names)
+  tournament.each do |round|
+    matchups.each do |matches_by_name|
+      unless used_matchup?(round, matches_by_name)
+        round.push(matches_by_name.shift)
+      end
+      break if round.count == 3
     end
   end
+  tournament
 end
 
-def used_name?(round, matchup)
-  name_one, name_two = matchup[0], matchup[1]
-  round.any? do |existing_matchup| 
-    existing_matchup.any? { |name| name == name_one || name == name_two }
+def used_matchup?(round, matches_by_name)
+  round.flatten.any? do |name|
+    name == matches_by_name.first[0] || name == matches_by_name.first[1]
   end
+end
+
+def create_rounds(names)
+  schedule = []
+  (names.count - 1).times { schedule << [] }
+  schedule
 end
 
 def generate_matchups(names)
   matchups = []
   names.each_with_index do |name, i|
     offset = 1
+    name_matches = []
     (names.count - 1).times do 
       if (i + offset) <= (names.count - 1)
-        matchups << [name, names[i + offset]]
+        name_matches << [name, names[i + offset]]
       else
-        matchups << [name, names[0 + ( (i + offset) - names.count)] ]
+        name_matches << [name, names[0 + ( (i + offset) - names.count)] ]
       end
       offset += 1
     end
+    matchups << name_matches
   end
   matchups
 end
 
 # p generate_matchups(['Dan', 'Tom', 'Frank', 'Fred', 'Marcus', 'Zak'])
+# p create_rounds(['Dan', 'Tom', 'Frank', 'Fred', 'Marcus', 'Zak'])
 p schedule_tournament(['Dan', 'Tom', 'Frank', 'Fred', 'Marcus', 'Zak'])
